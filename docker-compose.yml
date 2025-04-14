@@ -29,13 +29,13 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=Europe/London # Change to your timezone
+      - TZ=Europe/Istanbul  # Kendi zaman diliminize göre düzenleyin
       - SERVERPORT=51820
-      #- SERVERURL=my.ddns.net #optional - For use with DDNS (Uncomment to use)
-      - PEERS=1 # How many peers to generate for you (clients)
-      - PEERDNS=10.2.0.100 # Set it to point to adguard home
-      - INTERNAL_SUBNET=10.6.0.0
-      #- ALLOWEDIPS=10.2.0.0/24 # optional - split tunnel for web panel and DNS traffic only
+      #- SERVERURL=my.ddns.net  # DDNS kullanıyorsanız aktifleştirin
+      - PEERS=2              # İki ayrı VPN istemci profili oluşturulacak
+      - PEERDNS=10.2.0.100   # AdGuard Home'un IP'si
+      - INTERNAL_SUBNET=10.6.0.0/24  # CIDR formatında alt ağı belirtin
+      #- ALLOWEDIPS=10.2.0.0/24  # (Opsiyonel) Bölünmüş tünelleme için
     volumes:
       - ./wireguard:/config
       - /lib/modules:/lib/modules
@@ -54,7 +54,6 @@ services:
     image: adguard/adguardhome
     restart: unless-stopped
     hostname: adguard
-    # Volumes store your data between container upgrades
     volumes:
       - "./adguard/opt-adguard-work:/opt/adguardhome/work"
       - "./adguard/opt-adguard-conf:/opt/adguardhome/conf"
