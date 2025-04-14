@@ -1,27 +1,19 @@
-version: "3"
-
-networks:
-  private_network:
-    ipam:
-      driver: default
-      config:
-        - subnet: 10.2.0.0/24
+version: '3.8'
 
 services:
-  unbound:
-    image: "mvance/unbound:latest"
-    container_name: unbound
+  adguardhome:
+    image: adguard/adguardhome
+    container_name: adguardhome
     restart: unless-stopped
-    hostname: "unbound"
+    ports:
+      - "8080:80"        # Web arayüzü
+      - "5353:53/udp"    # DNS çözümleme (alternatif port)
     volumes:
-      - "./unbound:/opt/unbound/etc/unbound/"
-    networks:
-      private_network:
-        ipv4_address: 10.2.0.200
+      - ./adguard/work:/opt/adguardhome/work
+      - ./adguard/conf:/opt/adguardhome/conf
 
   wireguard:
-    depends_on: [unbound, adguard]
-    image: linuxserver/wireguard
+    image: lscr.io/linuxserver/wireguard:latest
     container_name: wireguard
     cap_add:
       - NET_ADMIN
@@ -30,14 +22,12 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=Europe/Istanbul
+      #- SERVERURL=yourdomain.com  # DDNS varsa kullan, yoksa IP yaz
       - SERVERPORT=51820
-      # - SERVERURL=my.ddns.net  # Eğer DDNS kullanıyorsanız açabilirsiniz
-      - PEERS=2
-      - PEERDNS=10.2.0.100
-      - INTERNAL_SUBNET=10.6.0.0/24
-      - ALLOWEDIPS=10.2.0.0/24,10.6.0.0/24  # Sadece yerel ağ ve DNS VPN'den geçsin
+      - PEERS=2  # Kaç cihaz bağlanacak
+      - PEERDNS=172.20.0.2  # AdGuard'ın container içi IP'si (aşağıda ağa göre ayarlanıyor)
     volumes:
-      - ./wireguard:/config
+      - ./wireguard/config:/config
       - /lib/modules:/lib/modules
     ports:
       - "51820:51820/udp"
@@ -45,18 +35,12 @@ services:
       - net.ipv4.conf.all.src_valid_mark=1
     restart: unless-stopped
     networks:
-      private_network:
-        ipv4_address: 10.2.0.3
+      adguard_vpn_net:
+        ipv4_address: 172.20.0.3
 
-  adguard:
-    depends_on: [unbound]
-    container_name: adguard
-    image: adguard/adguardhome
-    restart: unless-stopped
-    hostname: adguard
-    volumes:
-      - "./adguard/opt-adguard-work:/opt/adguardhome/work"
-      - "./adguard/opt-adguard-conf:/opt/adguardhome/conf"
-    networks:
-      private_network:
-        ipv4_address: 10.2.0.100
+networks:
+  adguard_vpn_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24
