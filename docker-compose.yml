@@ -4,7 +4,6 @@ services:
     container_name: adguardhome
     restart: unless-stopped
     ports:
-      - "8080:80"
       - "5353:53/udp"
     volumes:
       - ./adguard/work:/opt/adguardhome/work
