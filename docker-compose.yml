@@ -29,13 +29,13 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=Europe/Istanbul  # Kendi zaman diliminize göre düzenleyin
+      - TZ=Europe/Istanbul
       - SERVERPORT=51820
-      #- SERVERURL=my.ddns.net  # DDNS kullanıyorsanız aktifleştirin
-      - PEERS=2              # İki ayrı VPN istemci profili oluşturulacak
-      - PEERDNS=10.2.0.100   # AdGuard Home'un IP'si
-      - INTERNAL_SUBNET=10.6.0.0/24  # CIDR formatında alt ağı belirtin
-      #- ALLOWEDIPS=10.2.0.0/24  # (Opsiyonel) Bölünmüş tünelleme için
+      # - SERVERURL=my.ddns.net  # Eğer DDNS kullanıyorsanız açabilirsiniz
+      - PEERS=2
+      - PEERDNS=10.2.0.100
+      - INTERNAL_SUBNET=10.6.0.0/24
+      - ALLOWEDIPS=10.2.0.0/24,10.6.0.0/24  # Sadece yerel ağ ve DNS VPN'den geçsin
     volumes:
       - ./wireguard:/config
       - /lib/modules:/lib/modules
