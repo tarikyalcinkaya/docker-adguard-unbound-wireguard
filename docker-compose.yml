@@ -1,16 +1,17 @@
-version: '3.8'
-
 services:
   adguardhome:
     image: adguard/adguardhome
     container_name: adguardhome
     restart: unless-stopped
     ports:
-      - "8080:80"        # Web arayüzü
-      - "5353:53/udp"    # DNS çözümleme (alternatif port)
+      - "8080:80"
+      - "5353:53/udp"
     volumes:
       - ./adguard/work:/opt/adguardhome/work
       - ./adguard/conf:/opt/adguardhome/conf
+    networks:
+      adguard_vpn_net:
+        ipv4_address: 172.31.0.2
 
   wireguard:
     image: lscr.io/linuxserver/wireguard:latest
@@ -22,10 +23,10 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=Europe/Istanbul
-      #- SERVERURL=yourdomain.com  # DDNS varsa kullan, yoksa IP yaz
+      - SERVERURL=yourdomain.com
       - SERVERPORT=51820
-      - PEERS=2  # Kaç cihaz bağlanacak
-      - PEERDNS=172.20.0.2  # AdGuard'ın container içi IP'si (aşağıda ağa göre ayarlanıyor)
+      - PEERS=1
+      - PEERDNS=172.31.0.2
     volumes:
       - ./wireguard/config:/config
       - /lib/modules:/lib/modules
@@ -36,11 +37,11 @@ services:
     restart: unless-stopped
     networks:
       adguard_vpn_net:
-        ipv4_address: 172.20.0.3
+        ipv4_address: 172.31.0.3
 
 networks:
   adguard_vpn_net:
     driver: bridge
     ipam:
       config:
-        - subnet: 172.20.0.0/24
+        - subnet: 172.31.0.0/24
